@@ -1,6 +1,8 @@
+import math
+
 movies = [
     {"title": "The Dune Chronicles", "year": 2021, "genres": {"sci-fi", "drama"},
-     "rating": 8.6, "duration_min": 155, "actors": ["T. Chalamet", "R. Ferguson", "O. Isaac"]},
+     "rating": 8.6, "duration_min": 155, "actors": ["T. Chalamet", "R. Ferguson", "O. Isaac"]}, # noqa: E501
     {"title": "Kitchen Stories", "year": 2019, "genres": {"comedy", "drama"},
      "rating": 7.1, "duration_min": 98, "actors": ["A. Novak", "M. Ferguson"]},
     {"title": "silent hours", "year": 2016, "genres": {"thriller", "drama"},
@@ -28,3 +30,23 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+#Этап 1
+
+def average_rating(movies):
+    """Средняя оценка по каталогу, округлённая до одного знака"""
+    return round(sum(m["rating"] for m in movies) / len(movies), 1)
+
+
+def catalog_age_stats(movies, current_year=2026):
+    """возвращает кортеж 
+    (самый старый фильм в годах, самый новый фильм в годах, среднее)"""
+    ages = [current_year - m["year"] for m in movies]
+    return (max(ages), min(ages), math.ceil(sum(ages) / len(ages)))
+
+
+def duration_in_hours(minutes):
+    """Переводит минуты в формат 'Xч Yм'."""
+    return f"{minutes // 60}ч {minutes % 60}м"
+
