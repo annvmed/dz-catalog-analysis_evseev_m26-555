@@ -82,24 +82,125 @@ def count_long_movies(movies, threshold=120):
     return count
 
 
+# Этап 4
 
+def normalize_title(title):
+    """Title Case вручную, без str.title() """
+    words = title.split()
+    return " ".join(word[0].upper() + word[1:] for word in words)
+
+
+def make_slug(title):
+    """Слаг вида 'silent-hours' через .lower() и .replace()"""
+    return title.lower().replace(" ", "-")
+
+
+def format_report_line(movie):
+    """Единая строка описания фильма через f-строку """
+    genres = ", ".join(sorted(movie["genres"]))
+    return (
+        f'"{normalize_title(movie["title"])}" ({movie["year"]}) — '
+        f'{movie["rating"]}/10, {duration_in_hours(movie["duration_min"])}, '
+        f"жанры: {genres}"
+    )
+
+
+# Этап 5
+
+def titles_sorted_by_rating(movies):
+    """Названия фильмов по убыванию рейтинга (без изменения исходника) """
+    sorted_movies = sorted(movies, key=lambda m: m["rating"], reverse=True)
+    return [m["title"] for m in sorted_movies]
+
+
+def top_n_by_rating(movies, n=3):
+    """Топ-n как список кортежей (title, rating) """
+    sorted_movies = sorted(movies, key=lambda m: m["rating"], reverse=True)
+    return [(m["title"], m["rating"]) for m in sorted_movies[:n]]
+
+
+# Этап 6
+
+def count_by_genre(movies):
+    """{жанр: количество} через dict.get(), без Counter """
+    counts = {}
+    for movie in movies:
+        for genre in movie["genres"]:
+            counts[genre] = counts.get(genre, 0) + 1
+    return counts
+
+
+def actor_filmography(movies):
+    """{актер: [названия фильмов]} """
+    filmography = {}
+    for movie in movies:
+        for actor in movie["actors"]:
+            filmography.setdefault(actor, []).append(movie["title"])
+    return filmography
+
+
+def movies_above_average(movies):
+    """{title: rating} для rating > среднего сделать dict comprehension """
+    avg = average_rating(movies)
+    return {m["title"]: m["rating"] for m in movies if m["rating"] > avg}
+
+
+# Этап 7
+
+def all_genres(movies):
+    """Множество всех уникальных жанров (через |=) """
+    genres = set()
+    for movie in movies:
+        genres |= movie["genres"]
+    return genres
+
+
+def common_actors(movie1, movie2):
+    """Актёры, снимавшиеся в обоих фильмах (пересечение &) """
+    return set(movie1["actors"]) & set(movie2["actors"])
+
+
+def genres_only_in_one(movies_a, movies_b):
+    """Жанры из movies_a, которых нет в movies_b (разность -) """
+    return all_genres(movies_a) - all_genres(movies_b)
+
+
+# Этап 8
+
+def iter_high_rated(movies, min_rating=8.0):
+    """Лениво отдаёт фильмы с рейтингом >= min_rating через yield """
+    for movie in movies:
+        if movie["rating"] >= min_rating:
+            yield movie
+
+
+# Этап 9
+
+def build_report(movies):
+    """Единая точка входа - печатает полный отчёт по каталогу """
+    avg_rating = average_rating(movies)
+    _, _, avg_age = catalog_age_stats(movies)
+
+    print("ОТЧЁТ ПО КАТАЛОГУ")
+    print(f"Средний рейтинг: {avg_rating}")
+    print(f"Средний возраст фильмов: {avg_age} лет")
+    print()
+
+    print("Топ-3 фильма:")
+    for movie in sorted(movies, key=lambda m: m["rating"], reverse=True)[:3]:
+        print(f"  {format_report_line(movie)}")
+    print()
+
+    print("Фильмов по жанрам:")
+    counts = count_by_genre(movies)
+    for genre, count in sorted(counts.items(), key=lambda x: (-x[1], x[0])):
+        print(f"  {genre} — {count}")
+    print()
+
+    genres_list = sorted(all_genres(movies))
+    print(f"Все жанры каталога: {', '.join(genres_list)}")
 
 
 if __name__ == "__main__":
-    # Этап 3 - фильмы НЕ жанра comedy
-    for movie in movies:
-        if "comedy" in movie["genres"]:
-            continue
-        print(movie["title"])
-
-    # Этап 3 - первый фильм с rating > 9.0
-    i = 0
-    while i < len(movies):
-        if movies[i]["rating"] > 9.0:
-            print(f"Первый шедевр: {movies[i]['title']}")
-            break
-        i += 1
-    else:
-        print("Шедевров не найдено")
-
-    print(f"Длинных фильмов (>120 мин): {count_long_movies(movies)}")
+    """"Выводим итоговый отчет"""
+    build_report(movies)
