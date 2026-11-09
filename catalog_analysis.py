@@ -202,6 +202,20 @@ def build_report(movies):
 
 
 if __name__ == "__main__":
-    """"Выводим итоговый отчет"""
+    # Этап 3: фильмы НЕ жанра comedy
+    print("Фильмы которые НЕ относятся к жанру комедии: ")
+    for movie in movies:
+        if "comedy" in movie["genres"]:
+            continue
+        print("-", movie["title"])
+        
+
+    # Этап 8: демонстрация генератора
+    for movie in iter_high_rated(movies):
+        print(format_report_line(movie))
+    total = sum(m["duration_min"] for m in movies if m["rating"] > 7)
+    print(f"Суммарная длительность (rating > 7): {total} мин")
+    print()
+
+    # Этап 9: итоговый отчёт
     build_report(movies)
-    # ещё раз простите что не успел в срок, мне правда жаль, надеюсь на помилование
