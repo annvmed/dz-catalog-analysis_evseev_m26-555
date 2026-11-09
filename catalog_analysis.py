@@ -24,15 +24,7 @@ movies = [
 ]
 
 
-def main():
-    print("Hello from dz-catalog-analysis-evseev-m26-555!")
-
-
-if __name__ == "__main__":
-    main()
-
-
-#Этап 1
+# Этап 1
 
 def average_rating(movies):
     """Средняя оценка по каталогу, округлённая до одного знака"""
@@ -40,8 +32,10 @@ def average_rating(movies):
 
 
 def catalog_age_stats(movies, current_year=2026):
-    """возвращает кортеж 
-    (самый старый фильм в годах, самый новый фильм в годах, среднее)"""
+    """
+    возвращает кортеж 
+    (самый старый фильм в годах, самый новый фильм в годах, среднее)
+    """
     ages = [current_year - m["year"] for m in movies]
     return (max(ages), min(ages), math.ceil(sum(ages) / len(ages)))
 
@@ -50,3 +44,62 @@ def duration_in_hours(minutes):
     """Переводит минуты в формат 'Xч Yм'."""
     return f"{minutes // 60}ч {minutes % 60}м"
 
+
+# Этап 2
+
+def rating_tier(rating):
+    """Категория оценки. Содержит тернарный оператор в return."""
+    if rating >= 9:
+        tier = "шедевр"
+    elif rating >= 7:
+        tier = "хорошо"
+    elif rating >= 5:
+        tier = "средне"
+    else:
+        tier = "слабо"
+    return tier if rating <= 10 else "некорректный рейтинг"
+
+
+def decade_label(year):
+    """Метка десятилетия через match с case _ if."""
+    match year:
+        case _ if year > 2020:
+            return "новые"
+        case _ if year >= 2015:
+            return "недавние"
+        case _:
+            return "старые"
+
+
+# Этап 3
+
+def count_long_movies(movies, threshold=120):
+    """Считает фильмы длиннее threshold минут через накопитель."""
+    count = 0
+    for movie in movies:
+        if movie["duration_min"] > threshold:
+            count += 1
+    return count
+
+
+
+
+
+if __name__ == "__main__":
+    # Этап 3 - фильмы НЕ жанра comedy
+    for movie in movies:
+        if "comedy" in movie["genres"]:
+            continue
+        print(movie["title"])
+
+    # Этап 3 - первый фильм с rating > 9.0
+    i = 0
+    while i < len(movies):
+        if movies[i]["rating"] > 9.0:
+            print(f"Первый шедевр: {movies[i]['title']}")
+            break
+        i += 1
+    else:
+        print("Шедевров не найдено")
+
+    print(f"Длинных фильмов (>120 мин): {count_long_movies(movies)}")
